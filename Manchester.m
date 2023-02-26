@@ -38,6 +38,7 @@ ax1=gca;
 ax2 = axes('Position', get(ax1, 'Position'), 'Color', 'none');
 set(ax2, 'XAxisLocation', 'top');
 set(ax2, 'XLim', get(ax1, 'XLim'));
+set(ax2, 'YLim', get(ax1, 'YLim'));
 set(ax2, 'XTick', [bit_duration/2: bit_duration: Total_time]);
 set(ax2, 'XTickLabel', bits);
 set(ax2, 'XLabel', 'Data bits');
