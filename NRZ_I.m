@@ -10,7 +10,7 @@ Total_time = length(bits) * bit_duration;   # time needed to send whole data
 t = 0: 1/fs: Total_time-(1/fs);
 
 # sender end
-prv_state = -3
+prv_state = -3;
 for i = 1 : length(bits)
     if bits(i) == 0
       nrzi(((i-1) * bit_duration * fs) + 1 : i * bit_duration * fs) = prv_state;
