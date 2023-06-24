@@ -1,26 +1,24 @@
-clear all;
-close all;
-clc;
+clear all;close all;clc;
 
 carrier_amp = 1;
+carrier_frq = 10;
 message_amp = 1;
-carrier_frq = 15;
 message_frq = 1;
 
 Total_time = 5;
 t = 0 : 0.001: Total_time;
 
-message_signal = message_amp * sin(2 * pi * message_frq * t) + message_amp * cos(2 * pi * message_frq/2 * t);
+message_signal = message_amp * sin(2 * pi * message_frq/2 * t);
 carrier_signal = carrier_amp * sin(2 * pi * carrier_frq * t);
 
 modulated_signal = (carrier_amp + message_signal) .* carrier_signal;
 
 
-function m = amDemod(s,fc,fs,n)
+function m = amDemod(modulated_signal,fc,fs,n)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Function amDemod()
 % Goal  : Demodulation of an AM signal
-% IN    : - s : AM modulated signal
+% IN    : - modulated_signal : AM modulated signal
 %         - fc: Carrier signal frequency
 %         - fs: Sampling frequency
 %         - n : Number of carrier signal periods
@@ -28,19 +26,16 @@ function m = amDemod(s,fc,fs,n)
 % OUT   : - m : Original demodulated signal
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % Rectify the modulated signal
-  s = abs(s);
+  modulated_signal = abs(modulated_signal);
   % Set the number of samples on which to do the moving average
   k = round(n*fs/fc);
   % Take the moving average
-  m = movmean(s,k);
+  m = movmean(modulated_signal,k);
   % Remove the DC offset
   m = m-mean(m);
 endfunction
 
 demodulated_signal = amDemod(modulated_signal, carrier_frq, message_frq, length(t));
-
-
-
 
 subplot(411);
 plot(t, carrier_signal);
@@ -60,6 +55,7 @@ subplot(414);
 plot(t, demodulated_signal);
 title('Amplitude Demodulated Signal');
 line ([0, Total_time], [0 0], "linestyle", "--", "color", "r");
+
 
 
 

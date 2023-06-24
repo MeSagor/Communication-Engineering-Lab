@@ -1,6 +1,4 @@
-clear all;
-close all;
-clc;
+clear all;close all;clc;
 
 bits = [1 0 0 0 1 0 0 0 0 0 1 1 0 0 0 0 0 1 0 0 0 0 1 1];
 voltage = 3;
@@ -8,7 +6,6 @@ voltage = 3;
 zero_cnt = 0;
 one_cnt = 0;
 prv_nonzero_voltage = -voltage;
-modulated = [];
 for i = 1 : length(bits)
     if bits(i) == 0
         zero_cnt = zero_cnt + 1;
@@ -31,7 +28,6 @@ for i = 1 : length(bits)
         zero_cnt = 0;
     endif
 endfor
-%disp(modulated);
 
 bit_duration = 2;
 fs = 100;
@@ -39,7 +35,6 @@ Total_time = length(bits) * bit_duration;   # time needed to send whole data
 time = 0: 1/fs: Total_time;
 
 idx = 1;
-signal = [];
 for i = 1 : length(time)
     signal(i) = modulated(idx);
     if time(i) / bit_duration >= idx
@@ -73,7 +68,6 @@ set(ax2, 'XLabel', 'Data bits');
 
 
 %Demodulation
-demodulated = [];
 idx = 1;
 prv_nonzero_voltage = -voltage;
 for i = 1 : length(time)
@@ -100,3 +94,4 @@ disp(bits);
 
 disp("Demodulation:");
 disp(demodulated);
+

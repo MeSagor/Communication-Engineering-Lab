@@ -1,58 +1,92 @@
-clear all;
-close all;
-clc;
+close all; clear all; clc;
 
-bits = [1 0 1 0 0 1 1 0 1 1];
+bits = [1 0 1 1 1 0 1 0 0 0];
 bit_duration = 2;
 
 fs = 100;
-Total_time = length(bits) * bit_duration;   # time needed to send whole data
-t = 0: 1/fs: Total_time-(1/fs);
+total_time = length(bits) * bit_duration;
+time = 0: 1/fs : total_time;
 
-one = [ones(1, (fs/2) * bit_duration).*3, ones(1, (fs/2) * bit_duration).*-3];
-zero = [ones(1, (fs/2) * bit_duration).*-3, ones(1, (fs/2) * bit_duration).*3];
+amplitude = 3;
 
-# sender end
+# Modulation
+ix = 1;
 for i = 1 : length(bits)
-  if bits(i) == 0
-    manchester(((i-1) * bit_duration * fs) + 1 : i * bit_duration * fs) = zero;
+  if bits(i) == 1
+      signal_value(ix) = 1 * amplitude;
+      signal_value(ix+1) = -1 * amplitude;
   else
-    manchester(((i-1) * bit_duration * fs) + 1 : i * bit_duration * fs) = one;
+      signal_value(ix) = -1 * amplitude;
+      signal_value(ix+1) = 1 * amplitude;
+  endif
+  ix = ix+2;
+endfor
+
+idx = 1;
+for i = 1 : length(time)
+  modulated_signal(i) = signal_value(idx);
+  if time(i)/bit_duration >= idx/2
+      idx = idx+1;
   endif
 endfor
 
-# ploting
-plot(t, manchester);
-xticks([0: bit_duration: Total_time]);
+
+# Ploting
+plot(time, modulated_signal);
+xticks([0: bit_duration: total_time]);
 yticks([-5: 2: 5]);
 ylim([-5, 5]);
-xlim([0, Total_time]);
+xlim([0, total_time]);
 grid on;
-title("Manchester");
-xlabel("Time");
-ylabel("Amplitude");
-line ([0, Total_time], [0 0], "linestyle", "--", "color", "r");
+title('Manchester');
+xlabel('Time');
+ylabel('Amplitude');
+line([0, total_time], [0, 0], 'linestyle', '--', 'color', 'r')
 
-% Top axis
-ax1=gca;
-ax2 = axes('Position', get(ax1, 'Position'), 'Color', 'none');
-set(ax2, 'XAxisLocation', 'top');
-set(ax2, 'XLim', get(ax1, 'XLim'));
-set(ax2, 'YLim', get(ax1, 'YLim'));
-set(ax2, 'XTick', [bit_duration/2: bit_duration: Total_time]);
-set(ax2, 'YTick', [-5: 2: 5]);
-set(ax2, 'XTickLabel', bits);
-set(ax2, 'XLabel', 'Data bits');
+# Top axis
+ax1 = gca;
+ax2 = axes('position', get(ax1, 'position'), 'color', 'none');
+set(ax2, 'xaxislocation', 'top');
+set(ax2, 'xlim', get(ax1, 'xlim'));
+set(ax2, 'ylim', get(ax1, 'ylim'));
+set(ax2, 'xtick', [bit_duration/2: bit_duration: total_time]);
+set(ax2, 'ytick', get(ax1, 'ytick'));
+set(ax2, 'xticklabel', bits);
+set(ax2, 'xlabel', 'Data bits');
 
 
-
-# receiver end
-for i = 1 : length(manchester)/(bit_duration * fs)
-  if manchester(((i-1) * bit_duration * fs) + 1 : i * bit_duration * fs) == one
-    rcv_data(i) = 1;
-  else
-    rcv_data(i) = 0;
-  endif
+# Demodulation
+inx = 1;
+idx = 1;
+for i = 1 : length(time)-1
+    if time(i)/bit_duration >= idx/2
+      if mod(idx, 2) == 1   # Every mid-point check
+        value_first = modulated_signal(i)/amplitude;
+        value_second = modulated_signal(i+1)/amplitude;
+        if value_first == 1 && value_second == -1
+           received(inx) = 1;
+           inx = inx + 1;
+        elseif value_first == -1 && value_second == 1
+           received(inx) = 0;
+           inx = inx + 1;
+        endif
+      endif
+      idx = idx + 1;
+    endif
 endfor
 
-disp(rcv_data);
+disp('Sender End: ');
+disp(bits);
+disp('Receiver End: ');
+disp(received);
+
+
+
+
+
+
+
+
+
+
+

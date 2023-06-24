@@ -1,56 +1,84 @@
-clear all;
-close all;
-clc;
+close all; clear all; clc;
 
-bits = [1 0 1 0 0 1 1 0 1 1];
+bits = [1 0 1 1 1 0 1 0 0 0 1];
 bit_duration = 2;
 
 fs = 100;
-Total_time = length(bits) * bit_duration;   # time needed to send whole data
-t = 0: 1/fs: Total_time-(1/fs);
+total_time = length(bits) * bit_duration;
+time = 0: 1/fs : total_time;
 
-# sender end
-prv_one_bit_state = -3;
+amplitude = 3;
+
+# Modulation
+prv_state = -1;
 for i = 1 : length(bits)
-  if bits(i) == 0
-    ami(((i-1) * bit_duration * fs) + 1 : i * bit_duration * fs) = zeros(1, (fs * bit_duration));
+  if bits(i) == 1
+      signal_value(i) = -prv_state;
+      prv_state = -prv_state;
   else
-    prv_one_bit_state = -prv_one_bit_state;
-    ami(((i-1) * bit_duration * fs) + 1 : i * bit_duration * fs) = ones(1,(fs * bit_duration)) .* prv_one_bit_state;
+      signal_value(i) = 0;
   endif
 endfor
 
-# ploting
-plot(t, ami);
-xticks([0: bit_duration: Total_time]);
+idx = 1;
+for i = 1 : length(time)
+   modulated_signal(i) = signal_value(idx) * amplitude;
+   if time(i)/bit_duration >= idx
+     idx = idx + 1;
+   endif
+endfor
+
+
+# Ploting
+plot(time, modulated_signal);
+xticks([0: bit_duration: total_time]);
 yticks([-5: 2: 5]);
 ylim([-5, 5]);
-xlim([0, Total_time]);
+xlim([0, total_time]);
 grid on;
-title("Bipolar AMI");
-xlabel("Time");
-ylabel("Amplitude");
-line ([0, Total_time], [0 0], "linestyle", "--", "color", "r");
+title('AMI');
+xlabel('Time');
+ylabel('Amplitude');
+line([0, total_time], [0, 0], 'linestyle', '--', 'color', 'r')
 
-% Top axis
-ax1=gca;
-ax2 = axes('Position', get(ax1, 'Position'), 'Color', 'none');
-set(ax2, 'XAxisLocation', 'top');
-set(ax2, 'XLim', get(ax1, 'XLim'));
-set(ax2, 'YLim', get(ax1, 'YLim'));
-set(ax2, 'XTick', [bit_duration/2: bit_duration: Total_time]);
-set(ax2, 'YTick', [-5: 2: 5]);
-set(ax2, 'XTickLabel', bits);
-set(ax2, 'XLabel', 'Data bits');
+# Top axis
+ax1 = gca;
+ax2 = axes('position', get(ax1, 'position'), 'color', 'none');
+set(ax2, 'xaxislocation', 'top');
+set(ax2, 'xlim', get(ax1, 'xlim'));
+set(ax2, 'ylim', get(ax1, 'ylim'));
+set(ax2, 'xtick', [bit_duration/2: bit_duration: total_time]);
+set(ax2, 'ytick', get(ax1, 'ytick'));
+set(ax2, 'xticklabel', bits);
+set(ax2, 'xlabel', 'Data bits');
 
 
-# receiver end
-for i = 1 : length(ami)/(bit_duration * fs)
-  if ami(((i-1) * bit_duration * fs) + 1 : i * bit_duration * fs) == zeros(1, (fs * bit_duration))
-    rcv_data(i) = 0;
-  else
-    rcv_data(i) = 1;
-  endif
+# Demodulation
+idx = 1;
+for i = 1 : length(time)
+    if time(i)/bit_duration >= idx
+        value = modulated_signal(i)/amplitude;
+        if value == 0
+          received(idx) = 0;
+        else
+          received(idx) = 1;
+        endif
+        idx = idx + 1;
+    endif
 endfor
 
-disp(rcv_data);
+disp('Sender End: ');
+disp(bits);
+disp('Receiver End: ');
+disp(received);
+
+
+
+
+
+
+
+
+
+
+

@@ -1,6 +1,4 @@
-clear all;
-close all;
-clc;
+clear all;close all;clc;
 
 bits = [1 0 1 0 0 1 1 0 1 1 0 0 1];
 bit_duration = 2;
@@ -14,12 +12,10 @@ amplitude = 2;
 f = 0.5;
 carrier_signal = amplitude * sin(2 * pi * f * time);
 
-%plot(time, carrier_signal);
 
 idx = 1;
-modulated_carrier_signal = carrier_signal;
 for i = 1 : length(carrier_signal)
-     modulated_carrier_signal(i) = modulated_carrier_signal(i) * bits(idx);
+     modulated_carrier_signal(i) = carrier_signal(i) * bits(idx);
      if time(i)/bit_duration >= idx
         idx = idx + 1;
      endif
@@ -53,7 +49,6 @@ set(ax2, 'XLabel', 'Data bits');
 
 
 %Demodulation
-demodulated = [];
 idx = 1;
 for i = 1 : length(time)
     if time(i)/bit_duration >= idx
@@ -73,3 +68,4 @@ disp(bits);
 
 disp("Demodulation:");
 disp(demodulated);
+
